@@ -47,31 +47,47 @@ public class ARPHandler
 
         return Result;
     }
+
+    internal void AddARPRecord(ARPRecord Record)
+    {
+        if (!IPIsKnown(Record))
+        {
+            _record.Add(Record);
+            _logger.LogDebug($"ARP Added {Record.IP}");
+        }
+    }
+
+    private bool IPIsKnown(ARPRecord Record)
+    {
+        bool Result = false;
+        foreach (ARPRecord Single in _record)
+        {
+            if (Single.IP.Equals(Record.IP))
+            {
+                Result = true;
+                break;
+            }
+        }
+
+        return Result;
+    }
     
-    
-    // internal void Resolve(INetworkInterface Interface)
-    // {
-    //     LibPcapLiveDevice Correct = LibPcapLiveDeviceList.New().Where(LocalInt =>
-    //     {
-    //         if (LocalInt.Name.Equals(Interface.Name))
-    //         {
-    //             return true;
-    //         }
-    //         else
-    //         {
-    //             return false;
-    //         }
-    //
-    //     }).First();
-    //     IPAddress destination = IPAddress.Parse("192.168.1.1");
-    //     IPAddress source = IPAddress.Parse("192.168.1.196");
-    //     var acc = new ArpPacket(ArpOperation.Request, _broadcast, destination, Correct.MacAddress, source);
-    //     // ArpPacket a = new ArpPacket(ArpOperation.Request, _broadcast, ac, Correct.MacAddress, ac);
-    //     EthernetPacket c = new EthernetPacket(Correct.MacAddress, _broadcast, EthernetType.None)
-    //     {
-    //         PayloadPacket = acc
-    //     };
-    //     Correct.Open();
-    //     Correct.SendPacket(c);
-    // }
+    internal void Resolve(INetworkInterface Interface, IPAddress Destination)
+    {
+        LibPcapLiveDevice Device = LibPcapLiveDeviceList.New().Where(x => x.Name.Equals(Interface.Name)).First();
+        ArpPacket RequestArp = new ArpPacket(
+            ArpOperation.Request, 
+            _broadcast, 
+            Destination, 
+            Device.MacAddress,
+            Device.Addresses[0].Addr.ipAddress
+        );
+
+        EthernetPacket Packet = new EthernetPacket(Device.MacAddress, _broadcast, EthernetType.Arp)
+        {
+            PayloadPacket = RequestArp
+        };
+        Device.SendPacket(Packet);
+        
+    }
 }

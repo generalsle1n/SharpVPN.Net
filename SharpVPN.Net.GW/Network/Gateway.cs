@@ -1,9 +1,9 @@
-using System.Data;
-using System.Globalization;
 using System.Net;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using PacketDotNet;
+using SharpPcap;
 using SharpVPN.Net.GW.Network.Entities;
 using SharpVPN.Net.GW.Network.Entities.Implementations;
 using SharpVPN.Net.GW.Network.Protocols;
@@ -32,9 +32,12 @@ public class Gateway : IHostedService
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation($"Gateway Started: {_name}");
-        _arpHandler.GetMacByIP(IPAddress.Parse("172.16.1.1"));
+        
+        _lan.EnableInterface(this);
+        
         while (true)
         {
+            _arpHandler.Resolve(_lan, IPAddress.Parse("182.15.5.6"));
             _logger.LogDebug(DateTime.Now.ToString());
             await Task.Delay(1000);
         }
@@ -42,6 +45,14 @@ public class Gateway : IHostedService
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        _lan.DisableInterface();
+        return Task.CompletedTask;
+    }
+
+    public void PacketProcessor(object Sender, PacketCapture Caputre)
+    {
+        Packet Packet = Caputre.GetPacket().GetPacket();
+        var a = Packet.Extract<ArpPacket>();
+        _arpHandler.Resolve((INetworkInterface)Sender, IPAddress.Parse(""));
     }
 }
