@@ -1,5 +1,8 @@
 {
   "Gateway": {
-    "Name": "Main"
+    "Name": "Main",
+    "Interface": {
+      "Name": "wlp1s0"
+    }
   }
 }

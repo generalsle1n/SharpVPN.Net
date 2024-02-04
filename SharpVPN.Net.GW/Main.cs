@@ -1,17 +1,15 @@
-﻿// See https://aka.ms/new-console-template for more information
-
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Serilog;
 using SharpVPN.Net.GW.Network;
-using ILogger = Serilog.ILogger;
+using SharpVPN.Net.GW.Network.Protocols;
 
 const string SettingsFileName = "settings.json";
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
+    .MinimumLevel.Debug()
     .CreateLogger();
 
 var c = new ConfigurationBuilder()
@@ -26,6 +24,7 @@ var Builder = new HostBuilder()
     })
     .ConfigureServices((service) =>
     {
+        service.AddSingleton<ARPHandler>();
         service.AddHostedService<Gateway>();
     });
 
