@@ -7,6 +7,9 @@ using SharpPcap;
 using SharpPcap.LibPcap;
 using SharpVPN.Net.GW.Network.Entities;
 using SharpVPN.Net.GW.Network.Protocols.Model;
+using System.Timers;
+using Microsoft.Extensions.Configuration;
+using Timer = System.Timers.Timer;
 
 namespace SharpVPN.Net.GW.Network.Protocols;
 
@@ -16,20 +19,28 @@ public class ARPHandler
     private PhysicalAddress _broadcast = PhysicalAddress.Parse("FF-FF-FF-FF-FF-FF");
     private readonly ILogger<ARPHandler> _logger;
     private HashSet<ARPRecord> _record = new HashSet<ARPRecord>();
+    private int _ttl;
+    private Timer _timer;
+    private IConfiguration _config;
 
-    public ARPHandler(ILogger<ARPHandler> Logger)
+    public ARPHandler(ILogger<ARPHandler> Logger, IConfiguration Config)
     {
         _logger = Logger;
+        _config = Config;
+        _ttl = _config.GetValue<int>("Gateway:ARP:TTL");
         _logger.LogDebug("ARP Loaded");
-        var a =IPAddress.Parse("172.16.1.1");
-        var re = new ARPRecord()
-        {
-            IP = a,
-            MAC = _broadcast,
-            TTL = 60
-        };
-        _record.Add(re);
+        SetupCleanup();
     }
+
+    private void SetupCleanup()
+    {
+        _timer = new Timer();
+        _timer.Interval = _ttl * 1000;
+        _timer.Elapsed += CleanUpEntry;
+        _timer.Enabled = true;
+        _timer.Start();
+    }
+
 
     internal ARPRecord GetMacByIP(IPAddress IP)
     {
@@ -71,14 +82,14 @@ public class ARPHandler
 
         return Result;
     }
-    
+
     internal void Resolve(INetworkInterface Interface, IPAddress Destination)
     {
         LibPcapLiveDevice Device = LibPcapLiveDeviceList.New().Where(x => x.Name.Equals(Interface.Name)).First();
         ArpPacket RequestArp = new ArpPacket(
-            ArpOperation.Request, 
-            _broadcast, 
-            Destination, 
+            ArpOperation.Request,
+            _broadcast,
+            Destination,
             Device.MacAddress,
             Device.Addresses[0].Addr.ipAddress
         );
@@ -88,6 +99,10 @@ public class ARPHandler
             PayloadPacket = RequestArp
         };
         Device.SendPacket(Packet);
-        
+
+    }
+    private void CleanUpEntry(object sender, ElapsedEventArgs e)
+    {
+        _logger.LogInformation("Arp cleanup");
     }
 }

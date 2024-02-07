@@ -1,12 +1,15 @@
 using System.Net;
+using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using PacketDotNet;
+using PacketDotNet.Lsa;
 using SharpPcap;
 using SharpVPN.Net.GW.Network.Entities;
 using SharpVPN.Net.GW.Network.Entities.Implementations;
 using SharpVPN.Net.GW.Network.Protocols;
+using SharpVPN.Net.GW.Network.Protocols.Model;
 
 namespace SharpVPN.Net.GW.Network;
 public class Gateway : IHostedService
@@ -37,7 +40,7 @@ public class Gateway : IHostedService
         
         while (true)
         {
-            _arpHandler.Resolve(_lan, IPAddress.Parse("182.15.5.6"));
+            // _arpHandler.Resolve(_lan, IPAddress.Parse("182.15.5.6"));
             _logger.LogDebug(DateTime.Now.ToString());
             await Task.Delay(1000);
         }
@@ -52,7 +55,21 @@ public class Gateway : IHostedService
     public void PacketProcessor(object Sender, PacketCapture Caputre)
     {
         Packet Packet = Caputre.GetPacket().GetPacket();
-        var a = Packet.Extract<ArpPacket>();
-        _arpHandler.Resolve((INetworkInterface)Sender, IPAddress.Parse(""));
+        switch(Packet.PayloadPacket){
+            case ArpPacket:
+                _logger.LogDebug("Incoming Arp Response");
+                if(((ArpPacket)Packet.PayloadPacket).Operation == ArpOperation.Response){
+                    _arpHandler.AddARPRecord(new ARPRecord{
+                        IP = ((ArpPacket)Packet.PayloadPacket).SenderProtocolAddress,
+                        MAC = ((ArpPacket)Packet.PayloadPacket).SenderHardwareAddress,
+                        Created = DateTime.Now
+                    });
+                }
+                break;
+            case IPPacket:
+                Console.WriteLine("IP Packet found");
+                break;
+        }
+        // _arpHandler.Resolve((INetworkInterface)Sender, IPAddress.Parse(""));
     }
 }

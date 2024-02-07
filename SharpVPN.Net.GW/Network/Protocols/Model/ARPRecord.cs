@@ -7,5 +7,5 @@ public class ARPRecord
 {
     internal PhysicalAddress MAC { get; set; }
     internal IPAddress IP { get; set; }
-    internal int TTL { get; set; }
+    internal DateTime Created { get; set; }
 }
