@@ -10,6 +10,7 @@ using SharpVPN.Net.GW.Network.Protocols.Model;
 using System.Timers;
 using Microsoft.Extensions.Configuration;
 using Timer = System.Timers.Timer;
+using System.Reflection.Metadata;
 
 namespace SharpVPN.Net.GW.Network.Protocols;
 
@@ -103,6 +104,15 @@ public class ARPHandler
     }
     private void CleanUpEntry(object sender, ElapsedEventArgs e)
     {
-        _logger.LogInformation("Arp cleanup");
+        DateTime Date = DateTime.Now;
+        foreach (ARPRecord Record in _record)
+        {
+            int Seconds = (int)Math.Round((Date - Record.Created).TotalSeconds);
+            if (Seconds >= _ttl)
+            {
+                _record.Remove(Record);
+                _logger.LogDebug($"Removed ARP Entry: {Record.MAC}");
+            }
+        }
     }
 }
