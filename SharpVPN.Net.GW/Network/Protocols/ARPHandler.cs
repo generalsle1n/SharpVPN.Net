@@ -60,8 +60,15 @@ public class ARPHandler
         return Result;
     }
 
-    internal void AddARPRecord(ARPRecord Record)
+    internal void AddARPRecord(ArpPacket Packet)
     {
+        ARPRecord Record = new ARPRecord
+        {
+            IP = ((ArpPacket)Packet.PayloadPacket).SenderProtocolAddress,
+            MAC = ((ArpPacket)Packet.PayloadPacket).SenderHardwareAddress,
+            Created = DateTime.Now
+        };
+
         if (!IPIsKnown(Record))
         {
             _record.Add(Record);

@@ -19,7 +19,7 @@ public class Gateway : IHostedService
     private readonly IConfiguration _config;
     private INetworkInterface _lan;
     private ARPHandler _arpHandler;
-    
+
     public Gateway(IConfiguration Config, ILogger<Gateway> Logger, ARPHandler ARPHandler)
     {
         _config = Config;
@@ -35,9 +35,9 @@ public class Gateway : IHostedService
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation($"Gateway Started: {_name}");
-        
+
         _lan.EnableInterface(this);
-        
+
         while (true)
         {
             // _arpHandler.Resolve(_lan, IPAddress.Parse("182.15.5.6"));
@@ -55,15 +55,13 @@ public class Gateway : IHostedService
     public void PacketProcessor(object Sender, PacketCapture Caputre)
     {
         Packet Packet = Caputre.GetPacket().GetPacket();
-        switch(Packet.PayloadPacket){
+        switch (Packet.PayloadPacket)
+        {
             case ArpPacket:
                 _logger.LogDebug("Incoming Arp Response");
-                if(((ArpPacket)Packet.PayloadPacket).Operation == ArpOperation.Response){
-                    _arpHandler.AddARPRecord(new ARPRecord{
-                        IP = ((ArpPacket)Packet.PayloadPacket).SenderProtocolAddress,
-                        MAC = ((ArpPacket)Packet.PayloadPacket).SenderHardwareAddress,
-                        Created = DateTime.Now
-                    });
+                if (((ArpPacket)Packet.PayloadPacket).Operation == ArpOperation.Response)
+                {
+                    _arpHandler.AddARPRecord((ArpPacket)Packet);
                 }
                 break;
             case IPPacket:
