@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using SharpVPN.Net.GW;
 using SharpVPN.Net.GW.Network;
 using SharpVPN.Net.GW.Network.Protocols;
 
@@ -25,6 +26,7 @@ var Builder = new HostBuilder()
     .ConfigureServices((service) =>
     {
         service.AddSingleton<ARPHandler>();
+        service.AddSingleton<IPv4Handler>();
         service.AddHostedService<Gateway>();
     });
 
