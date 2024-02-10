@@ -19,18 +19,18 @@ public class Gateway : IHostedService
     private readonly IConfiguration _config;
     private INetworkInterface _lan;
     private ARPHandler _arpHandler;
+    private IPv4Handler _ipv4Handler;
+    private List<INetworkInterface> _interfaces = new List<INetworkInterface>();
 
-    public Gateway(IConfiguration Config, ILogger<Gateway> Logger, ARPHandler ARPHandler)
+    public Gateway(IConfiguration Config, ILogger<Gateway> Logger, ARPHandler ARPHandler, IPv4Handler IPv4Hanlder)
     {
         _config = Config;
         _logger = Logger;
         _arpHandler = ARPHandler;
+        _ipv4Handler = IPv4Hanlder;
         _name = _config.GetValue<string>("Gateway:Name");
 
-        _lan = new PhysicalInterface()
-        {
-            Name = _config.GetValue<string>("Gateway:Interface:Name")
-        };
+        SetupInterfaces();
     }
     public async Task StartAsync(CancellationToken cancellationToken)
     {
@@ -40,18 +40,15 @@ public class Gateway : IHostedService
 
         while (true)
         {
-            // _arpHandler.Resolve(_lan, IPAddress.Parse("182.15.5.6"));
             _logger.LogDebug(DateTime.Now.ToString());
             await Task.Delay(1000);
         }
     }
-
     public Task StopAsync(CancellationToken cancellationToken)
     {
         _lan.DisableInterface();
         return Task.CompletedTask;
     }
-
     public void PacketProcessor(object Sender, PacketCapture Caputre)
     {
         Packet Packet = Caputre.GetPacket().GetPacket();
@@ -68,6 +65,35 @@ public class Gateway : IHostedService
                 Console.WriteLine("IP Packet found");
                 break;
         }
-        // _arpHandler.Resolve((INetworkInterface)Sender, IPAddress.Parse(""));
+    }
+    private void SetupInterfaces()
+    {
+        int Count = 0;
+        while (true)
+        {
+            string Name = _config.GetValue<string>($"Gateway:Interface:{Count}:Name");
+            if (Name is not null)
+            {
+                IPAddress IP = IPAddress.Parse(_config.GetValue<string>($"Gateway:Interface:{Count}:IP"));
+                string Type = _config.GetValue<string>($"Gateway:Interface:{Count}:Type");
+
+                if (Type.Equals("Physical"))
+                {
+                    _interfaces.Add(new PhysicalInterface
+                    {
+                        Name = Name,
+                        IPAddress = IP
+                    });
+
+                    _logger.LogInformation($"Added {Type} Interface {Name}");
+                }
+            }
+            else
+            {
+                break;
+            }
+
+            Count++;
+        }
     }
 }
