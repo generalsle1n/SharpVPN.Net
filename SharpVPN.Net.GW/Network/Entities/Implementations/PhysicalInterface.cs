@@ -2,6 +2,7 @@ using SharpPcap;
 using SharpPcap.LibPcap;
 using SharpVPN.Net.GW.Network.Protocols;
 using PacketDotNet;
+using System.Net;
 
 
 namespace SharpVPN.Net.GW.Network.Entities.Implementations;
@@ -9,7 +10,9 @@ namespace SharpVPN.Net.GW.Network.Entities.Implementations;
 public class PhysicalInterface : INetworkInterface
 {
     public string Name { get; init; }
-    private LibPcapLiveDevice _interface { get; set; } 
+    private LibPcapLiveDevice _interface { get; set; }
+    public IPAddress IPAddress { get; set; }
+
     public void EnableInterface(Gateway Gateway)
     {
         _interface = LibPcapLiveDeviceList.New().Where(x => x.Name.Equals(Name)).First();
@@ -24,4 +27,8 @@ public class PhysicalInterface : INetworkInterface
         _interface.Dispose();
     }
 
+    public void SetIPAddress(IPAddress IP)
+    {
+        IPAddress = IP;
+    }
 }
