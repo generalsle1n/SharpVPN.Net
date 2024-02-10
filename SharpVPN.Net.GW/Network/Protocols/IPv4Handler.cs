@@ -1,6 +1,6 @@
 ﻿namespace SharpVPN.Net.GW;
 
-public class IPv4Hander
+public class IPv4Handler
 {
 
 }
