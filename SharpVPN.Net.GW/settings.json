@@ -1,8 +1,28 @@
 {
   "Gateway": {
     "Name": "Main",
-    "Interface": {
-      "Name": "wlp1s0"
+    "Interface": [
+      {
+        "Name": "wlp1s0",
+        "IP": "192.168.1.196",
+        "Type": "Physical"
+      },
+      {
+        "Name": "lo",
+        "IP": "127.0.0.1",
+        "Type": "Physical"
+      }
+    ],
+    "ARP": {
+      "TTL": 10
     }
-  }
+  },
+  "IPv4Routes": [
+    {
+      "Destination": "182.1.4.0",
+      "Subnet": "/24",
+      "Gateway": "192.168.1.196",
+      "Priority": 5
+    }
+  ]
 }
