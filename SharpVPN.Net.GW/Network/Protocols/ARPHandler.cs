@@ -10,7 +10,6 @@ using SharpVPN.Net.GW.Network.Protocols.Model;
 using System.Timers;
 using Microsoft.Extensions.Configuration;
 using Timer = System.Timers.Timer;
-using System.Reflection.Metadata;
 
 namespace SharpVPN.Net.GW.Network.Protocols;
 
@@ -41,7 +40,6 @@ public class ARPHandler
         _timer.Enabled = true;
         _timer.Start();
     }
-
 
     internal ARPRecord GetMacByIP(IPAddress IP)
     {
