@@ -24,13 +24,6 @@
       "Interface": "wlp1s0",
       "Gateway": "182.1.4.5",
       "Priority": 5
-    },
-    {
-      "Destination": "0.0.0.0",
-      "Subnet": "/0",
-      "Interface": "lo",
-      "Gateway": "127.0.0.1",
-      "Priority": 10
     }
   ]
 }
