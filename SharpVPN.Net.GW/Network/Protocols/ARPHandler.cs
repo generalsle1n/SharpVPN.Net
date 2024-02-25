@@ -14,7 +14,6 @@ namespace SharpVPN.Net.GW.Network.Protocols;
 
 public class ARPHandler
 {
-
     private PhysicalAddress _broadcast = PhysicalAddress.Parse("FF-FF-FF-FF-FF-FF");
     private readonly ILogger<ARPHandler> _logger;
     private HashSet<ARPRecord> _record = new HashSet<ARPRecord>();
