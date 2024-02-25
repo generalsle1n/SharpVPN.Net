@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.NetworkInformation;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using PacketDotNet;
 using SharpPcap;

@@ -3,7 +3,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using PacketDotNet;
 using SharpPcap.LibPcap;
-using SharpPcap.WinDivert;
 
 namespace SharpVPN.Net.GW;
 

@@ -1,7 +1,5 @@
 using SharpPcap;
 using SharpPcap.LibPcap;
-using SharpVPN.Net.GW.Network.Protocols;
-using PacketDotNet;
 using System.Net;
 
 

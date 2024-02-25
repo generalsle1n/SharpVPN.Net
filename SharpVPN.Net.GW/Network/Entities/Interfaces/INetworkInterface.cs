@@ -1,7 +1,4 @@
 using System.Net;
-using SharpPcap;
-using SharpPcap.LibPcap;
-using SharpVPN.Net.GW.Network.Protocols;
 
 namespace SharpVPN.Net.GW.Network.Entities;
 
