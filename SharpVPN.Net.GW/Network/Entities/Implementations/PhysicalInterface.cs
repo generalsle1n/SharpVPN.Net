@@ -25,7 +25,7 @@ public class PhysicalInterface : INetworkInterface
         _interface.Dispose();
     }
 
-    public void SetIPAddress(IPAddress IP)
+    public void SetIPAddress(IPAddress IP, string Subnet)
     {
         IPAddress = IP;
     }
