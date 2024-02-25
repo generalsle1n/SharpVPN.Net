@@ -79,17 +79,30 @@ public class Gateway : IHostedService
             {
                 IPAddress IP = IPAddress.Parse(_config.GetValue<string>($"Gateway:Interface:{Count}:IP"));
                 string Type = _config.GetValue<string>($"Gateway:Interface:{Count}:Type");
+                string Subnet = _config.GetValue<string>($"Gateway:Interface:{Count}:Subnet");
 
                 if (Type.Equals("Physical"))
                 {
                     INetworkInterface Interface = new PhysicalInterface
                     {
+                        Name = Name
+                    };
+                    Interface.EnableInterface(this);
+                    Interface.SetIPAddress(IP, Subnet);
+                    _interfaces.Add(Interface);
+
+                    _logger.LogInformation($"Added {Type} Interface {Name} and Enabled");
+                }
+                else if (Type.Equals("Virtual"))
+                {
+                    INetworkInterface Interface = new VirtualInterface()
+                    {
                         Name = Name,
                         IPAddress = IP
                     };
                     Interface.EnableInterface(this);
+                    Interface.SetIPAddress(IP, Subnet);
                     _interfaces.Add(Interface);
-
                     _logger.LogInformation($"Added {Type} Interface {Name} and Enabled");
                 }
             }
