@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using PacketDotNet;
+using SharpPcap;
 using SharpPcap.LibPcap;
 
 namespace SharpVPN.Net.GW;
@@ -21,10 +22,15 @@ public class IPv4Handler
 
     public void Process(IPPacket Packet)
     {
-        Console.WriteLine(Packet.DestinationAddress);
-        if (Packet.DestinationAddress.Equals(IPAddress.Parse("182.1.4.5")))
+        IPv4RouteRecord Route = GetRoute(Packet);
+        if (Route is IPv4RouteRecord)
         {
-            LibPcapLiveDevice Destination = GetNetworkdeviceFromRoute(Packet.DestinationAddress);
+            _logger.LogDebug($"{Packet.DestinationAddress} is routed");
+            //Send Packet
+        }
+        else
+        {
+            _logger.LogDebug($"{Packet.DestinationAddress} is not routed");
         }
     }
 
@@ -106,5 +112,18 @@ public class IPv4Handler
             return route.Destination.Contains(Destination);
         }).First();
         return Result.Interface;
+    }
+    private IPv4RouteRecord GetRoute(IPPacket IP)
+    {
+        IPv4RouteRecord Result = null;
+        foreach (IPv4RouteRecord Route in _routes)
+        {
+            if (Route.Destination.Contains(IP.DestinationAddress))
+            {
+                Result = Route;
+                break;
+            };
+        }
+        return Result;
     }
 }
