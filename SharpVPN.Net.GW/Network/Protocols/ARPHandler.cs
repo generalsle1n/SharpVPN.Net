@@ -62,8 +62,8 @@ public class ARPHandler
     {
         ARPRecord Record = new ARPRecord
         {
-            IP = ((ArpPacket)Packet.PayloadPacket).SenderProtocolAddress,
-            MAC = ((ArpPacket)Packet.PayloadPacket).SenderHardwareAddress,
+            IP = Packet.SenderProtocolAddress,
+            MAC = Packet.SenderHardwareAddress,
             Created = DateTime.Now
         };
 
