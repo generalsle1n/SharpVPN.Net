@@ -1,15 +1,12 @@
 using System.Net;
-using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using PacketDotNet;
-using PacketDotNet.Lsa;
 using SharpPcap;
 using SharpVPN.Net.GW.Network.Entities;
 using SharpVPN.Net.GW.Network.Entities.Implementations;
 using SharpVPN.Net.GW.Network.Protocols;
-using SharpVPN.Net.GW.Network.Protocols.Model;
 
 namespace SharpVPN.Net.GW.Network;
 public class Gateway : IHostedService
@@ -36,12 +33,10 @@ public class Gateway : IHostedService
     {
         _logger.LogInformation($"Gateway Started: {_name}");
 
-        _lan.EnableInterface(this);
-
         while (true)
         {
             _logger.LogDebug(DateTime.Now.ToString());
-            await Task.Delay(1000);
+            await Task.Delay(10000);
         }
     }
     public Task StopAsync(CancellationToken cancellationToken)
@@ -58,11 +53,19 @@ public class Gateway : IHostedService
                 _logger.LogDebug("Incoming Arp Response");
                 if (((ArpPacket)Packet.PayloadPacket).Operation == ArpOperation.Response)
                 {
-                    _arpHandler.AddARPRecord((ArpPacket)Packet);
+                    _arpHandler.AddARPRecord((ArpPacket)Packet.PayloadPacket);
                 }
                 break;
             case IPPacket:
-                Console.WriteLine("IP Packet found");
+                if (Packet.PayloadPacket is IPv4Packet)
+                {
+                    _ipv4Handler.Process((IPPacket)Packet.PayloadPacket);
+                }
+                else
+                {
+                    _logger.LogDebug("Discarded IPv6 Packet");
+                }
+
                 break;
         }
     }
@@ -79,13 +82,15 @@ public class Gateway : IHostedService
 
                 if (Type.Equals("Physical"))
                 {
-                    _interfaces.Add(new PhysicalInterface
+                    INetworkInterface Interface = new PhysicalInterface
                     {
                         Name = Name,
                         IPAddress = IP
-                    });
+                    };
+                    Interface.EnableInterface(this);
+                    _interfaces.Add(Interface);
 
-                    _logger.LogInformation($"Added {Type} Interface {Name}");
+                    _logger.LogInformation($"Added {Type} Interface {Name} and Enabled");
                 }
             }
             else
