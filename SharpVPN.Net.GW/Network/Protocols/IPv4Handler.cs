@@ -1,6 +1,9 @@
 ﻿using System.Net;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using PacketDotNet;
+using SharpPcap.LibPcap;
+using SharpPcap.WinDivert;
 
 namespace SharpVPN.Net.GW;
 
@@ -17,6 +20,15 @@ public class IPv4Handler
         CreateRoutes();
     }
 
+    public void Process(IPPacket Packet)
+    {
+        Console.WriteLine(Packet.DestinationAddress);
+        if (Packet.DestinationAddress.Equals(IPAddress.Parse("182.1.4.5")))
+        {
+            LibPcapLiveDevice Destination = GetNetworkdeviceFromRoute(Packet.DestinationAddress);
+        }
+    }
+
     private void CreateRoutes()
     {
         int Count = 0;
@@ -28,15 +40,17 @@ public class IPv4Handler
                 IPAddress Gateway = IPAddress.Parse(_config.GetValue<string>($"IPv4Routes:{Count}:Gateway"));
                 int Subnet = int.Parse(_config.GetValue<string>($"IPv4Routes:{Count}:Subnet").Replace("/", ""));
                 int Priorty = _config.GetValue<int>($"IPv4Routes:{Count}:Priority");
-                IPNetwork IPNetwork = new IPNetwork(IPAddress.Parse(Network), Subnet);
+                IPNetwork2 IPNetwork = IPNetwork2.Parse($"{Gateway}/{Subnet}");
 
+                LibPcapLiveDevice Device = GetDeviceFromInterfaceName(_config.GetValue<string>($"IPv4Routes:{Count}:Interface"));
                 _routes.Add(new IPv4RouteRecord
                 {
                     Destination = IPNetwork,
                     Gateway = Gateway,
-                    Priorty = Priorty
+                    Priorty = Priorty,
+                    Interface = Device
                 });
-                _logger.LogInformation($"Route added: {IPNetwork} GW {Gateway}");
+                _logger.LogInformation($"Route added: {IPNetwork} GW {Gateway} Interface: {Device.Name}");
             }
             else
             {
@@ -45,6 +59,53 @@ public class IPv4Handler
 
             Count++;
         }
-        System.Console.WriteLine();
+    }
+    private LibPcapLiveDevice GetDeviceFromIP(IPAddress IP)
+    {
+        LibPcapLiveDeviceList AllDevices = LibPcapLiveDeviceList.Instance;
+
+        LibPcapLiveDevice Result = null;
+
+        foreach (LibPcapLiveDevice Device in AllDevices)
+        {
+            foreach (PcapAddress Address in Device.Addresses)
+            {
+                if (Address.Addr.ipAddress is not null)
+                {
+                    if (Address.Addr.ipAddress.Equals(IP))
+                    {
+                        Result = Device;
+                        break;
+                    }
+                }
+            }
+            if (Result is not null)
+            {
+                break;
+            }
+        }
+        return Result;
+    }
+    private LibPcapLiveDevice GetDeviceFromInterfaceName(string Name)
+    {
+        return LibPcapLiveDeviceList.Instance.Where(inter =>
+        {
+            if (inter.Name.Equals(Name))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }).FirstOrDefault();
+    }
+    private LibPcapLiveDevice GetNetworkdeviceFromRoute(IPAddress Destination)
+    {
+        IPv4RouteRecord Result = _routes.Where(route =>
+        {
+            return route.Destination.Contains(Destination);
+        }).First();
+        return Result.Interface;
     }
 }
