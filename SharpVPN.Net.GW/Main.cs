@@ -27,6 +27,7 @@ var Builder = new HostBuilder()
     {
         service.AddSingleton<ARPHandler>();
         service.AddSingleton<IPv4Handler>();
+        service.AddSingleton<ClientHandler>();
         service.AddHostedService<Gateway>();
     });
 

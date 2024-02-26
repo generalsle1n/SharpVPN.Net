@@ -18,16 +18,19 @@ public class Gateway : IHostedService
     private ARPHandler _arpHandler;
     private IPv4Handler _ipv4Handler;
     private List<INetworkInterface> _interfaces = new List<INetworkInterface>();
+    private ClientHandler _client;
 
-    public Gateway(IConfiguration Config, ILogger<Gateway> Logger, ARPHandler ARPHandler, IPv4Handler IPv4Hanlder)
+    public Gateway(IConfiguration Config, ILogger<Gateway> Logger, ARPHandler ARPHandler, IPv4Handler IPv4Hanlder, ClientHandler Client)
     {
         _config = Config;
         _logger = Logger;
         _arpHandler = ARPHandler;
         _ipv4Handler = IPv4Hanlder;
         _name = _config.GetValue<string>("Gateway:Name");
+        _client = Client;
 
         SetupInterfaces();
+        _client.SetupServer(_interfaces[0]);
     }
     public async Task StartAsync(CancellationToken cancellationToken)
     {
