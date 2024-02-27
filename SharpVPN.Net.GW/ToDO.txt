@@ -3,3 +3,11 @@ Implement Send Function in IPv4 Hanlder
 Get Free IP from IP Hanlder
 
 Fix Interface by Public Gateway.cs 31
+
+Auth Flow:
+SslStream via Rsa mit Cert für Connection aushandling
+Server Thumbprint muss im Client definiert werden
+
+In dieser Phase wird auch der Benutzer geprüft, soll erweiterbar sein
+
+Danach wird auf Symetric aes umgeswitched
