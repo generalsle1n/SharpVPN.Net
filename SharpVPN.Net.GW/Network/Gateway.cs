@@ -35,7 +35,6 @@ public class Gateway : IHostedService
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation($"Gateway Started: {_name}");
-
         while (true)
         {
             _logger.LogDebug(DateTime.Now.ToString());
