@@ -11,3 +11,8 @@ Server Thumbprint muss im Client definiert werden
 In dieser Phase wird auch der Benutzer geprüft, soll erweiterbar sein
 
 Danach wird auf Symetric aes umgeswitched
+
+Cancel Token 
+Gemeinsame Libary
+Loggin noch richtig machen
+Exception Handling
