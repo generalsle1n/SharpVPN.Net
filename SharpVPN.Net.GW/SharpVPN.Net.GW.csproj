@@ -16,12 +16,22 @@
       <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
       <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
       <PackageReference Include="SharpPcap" Version="6.2.5" />
-      <PackageReference Include="PacketDotNet" Version="1.4.7"/>
-      <PackageReference Include="IPNetwork2" Version="3.0.651"/>
+      <PackageReference Include="PacketDotNet" Version="1.4.7" />
+      <PackageReference Include="IPNetwork2" Version="3.0.651" />
     </ItemGroup>
 
     <ItemGroup>
       <None Update="settings.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+    <ItemGroup>
+      <None Update="server.pfx">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+    <ItemGroup>
+      <None Update="server.key">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>
