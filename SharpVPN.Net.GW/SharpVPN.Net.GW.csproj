@@ -35,5 +35,8 @@
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\SharpVPN.Net.Common\SharpVPN.Net.Common.csproj" />
+    </ItemGroup>
 
 </Project>
